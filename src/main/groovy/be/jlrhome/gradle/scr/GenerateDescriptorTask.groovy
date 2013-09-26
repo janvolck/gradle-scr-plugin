@@ -7,8 +7,7 @@ import org.apache.felix.scrplugin.Options
 import org.apache.felix.scrplugin.Project
 import org.apache.felix.scrplugin.SpecVersion
 import org.apache.felix.scrplugin.Source
-import org.codehaus.plexus.util.FileUtils
-import org.codehaus.plexus.util.StringUtils
+import org.apache.felix.scrplugin.Result
 
 class GenerateDescriptorTask extends DefaultTask {
 
@@ -23,25 +22,31 @@ class GenerateDescriptorTask extends DefaultTask {
             dependenciesAsUrl.add(f.toURI().toURL())
             project.logger.info("dependency add: {}", f)
         }
-        dependenciesAsUrl.add(new File("build/classes/main").toURI().toURL())
 
-        project.sourceSets.main.java.each{File f ->
+        dependenciesAsUrl.add(project.sourceSets.main.output.classesDir.toURI().toURL())
+        project.scr.sources.each{File f ->
 
             def className = f.getAbsolutePath()
+            project.logger.debug("Process {}",className)
 
             // strip the source directory from the classname
-            project.sourceSets.main.java.getSrcDirTrees().each{ t ->
+            project.scr.sources.getSrcDirTrees().each{ t ->
                 if(className.startsWith(t.getDir().getAbsolutePath())){
                     className = className.substring(t.getDir().getAbsolutePath().length()+1)
+                    project.logger.debug(" --> Remove source directory new ClassName : {}",className)
                 }
             }
 
             // strip extension
-            className = StringUtils.stripEnd(className, ".java");
+            if(className.endsWith(".java")){
+                className = className.substring(0, className.length()-".java".length())
+                project.logger.debug(" --> Remove extension new ClassName : {}",className)
+            }
 
             // change path seperators to .
-            className = StringUtils.replace(className, '\\', '/');
-            className = StringUtils.replace(className, '/', '.');
+            className = className.replace('\\', '/');
+            className = className.replace('/', '.');
+            project.logger.debug(" --> Change path seperators new ClassName : {}",className)
 
             project.logger.debug("Source [{}, {}]",className, f.toString())
 
@@ -53,7 +58,7 @@ class GenerateDescriptorTask extends DefaultTask {
         scrProject.setClassLoader(new URLClassLoader((URL[])dependenciesAsUrl.toArray(), this.getClass().getClassLoader()))
         scrProject.setDependencies(dependenciesAsUrl)
         scrProject.setSources(sources)
-        scrProject.setClassesDirectory('build/classes/main')
+        scrProject.setClassesDirectory(project.sourceSets.main.output.classesDir.getAbsolutePath())
 
         return scrProject
     }
@@ -61,22 +66,70 @@ class GenerateDescriptorTask extends DefaultTask {
     Options createOptions() {
 
         def scrOptions = new Options()
-        scrOptions.setOutputDirectory(new File("build/scr"))
-        scrOptions.setGenerateAccessors(true)
-        scrOptions.setStrictMode(false)
-        scrOptions.setProperties(new HashMap<String, String>())
-        scrOptions.setSpecVersion(SpecVersion.fromName("1.2"))
+        scrOptions.setOutputDirectory(project.scr.outputDirectory)
+        scrOptions.setGenerateAccessors(project.scr.generateAccessors)
+        scrOptions.setStrictMode(project.scr.strictMode)
+        scrOptions.setProperties(project.scr.properties)
+        scrOptions.setSpecVersion(SpecVersion.fromName(project.scr.specVersion))
 
         return scrOptions
+    }
+
+    def updateManifest(Result scrResult, Options scrOptions) {
+
+        project.logger.debug("Processing SCR result")
+        def osgiInfDir = new File(scrOptions.getOutputDirectory(), "OSGI-INF")
+        if(osgiInfDir.exists()) {
+            project.logger.debug(" --> OSGI-INF found at : {}", osgiInfDir)
+
+            final Set<String> serviceFiles = new HashSet<String>();
+
+            // keep existing Service-Component tag in manifest
+            String sc = project.jar.manifest.instructions.get("Service-Component")
+            if(sc != null){
+                project.logger.debug(" --> Service-Component found in manifest with value {}", sc)
+                final StringTokenizer st = new StringTokenizer(sc, ",")
+                while ( st.hasMoreTokens() ) {
+                    final String token = st.nextToken();
+                    serviceFiles.add(token.trim());
+                }
+            }
+
+            project.fileTree(dir: project.file(osgiInfDir), includes:['*.xml']).each{ f ->
+
+                project.logger.debug(" --> Adding Service-Component xml {}", f.getName())
+                serviceFiles.add("OSGI-INF/" + f.getName())
+            }
+
+            boolean first = true
+            StringBuilder sb = new StringBuilder()
+            serviceFiles.each{ service ->
+                if(!first) {
+                    sb.append(", ")
+                } else {
+                    first = false;
+                }
+
+                sb.append(service)
+            }
+
+            project.logger.debug(" --> Updating Service-Component value with {}", sb.toString())
+            project.jar.manifest.instruction("Service-Component", sb.toString())
+            project.jar.from(project.fileTree(dir: scrOptions.getOutputDirectory(), includes:["OSGI-INF/*"]))
+        }
     }
 
     @TaskAction
     def generateScrDescriptor() {
 
-        SCRDescriptorGenerator scrGenerator = new SCRDescriptorGenerator(new GradleLog(project.logger))
-        scrGenerator.setOptions(createOptions())
-        scrGenerator.setProject(createProject())
+        Options scrOptions = createOptions()
+        Project scrProject = createProject()
 
-        scrGenerator.execute()
+        SCRDescriptorGenerator scrGenerator = new SCRDescriptorGenerator(new GradleLog(project.logger))
+        scrGenerator.setOptions(scrOptions)
+        scrGenerator.setProject(scrProject)
+
+        Result result = scrGenerator.execute()
+        updateManifest(result, scrOptions)
     }
 }
