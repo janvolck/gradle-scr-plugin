@@ -15,14 +15,17 @@ class GenerateDescriptorTask extends DefaultTask {
 
         def scrProject = new Project()
         def dependenciesAsUrl = new ArrayList<URL>()
+        def dependenciesAsFile = new ArrayList<File>()
         def sources = new ArrayList<Source>()
 
         project.configurations.compile.resolvedConfiguration.getResolvedArtifacts().each { artifact ->
             def f = artifact.getFile()
+            dependenciesAsFile.add(f)
             dependenciesAsUrl.add(f.toURI().toURL())
             project.logger.info("dependency add: {}", f)
         }
 
+        dependenciesAsFile.add(project.sourceSets.main.output.classesDir)
         dependenciesAsUrl.add(project.sourceSets.main.output.classesDir.toURI().toURL())
         project.scr.sources.each{File f ->
 
@@ -56,7 +59,7 @@ class GenerateDescriptorTask extends DefaultTask {
 
 
         scrProject.setClassLoader(new URLClassLoader((URL[])dependenciesAsUrl.toArray(), this.getClass().getClassLoader()))
-        scrProject.setDependencies(dependenciesAsUrl)
+        scrProject.setDependencies(dependenciesAsFile)
         scrProject.setSources(sources)
         scrProject.setClassesDirectory(project.sourceSets.main.output.classesDir.getAbsolutePath())
 
