@@ -28,9 +28,9 @@ Troubleshooting
 * If the gradle-scr-plugin throws an exception like: Could not create an instance of type be.jlrhome.gradle.scr.ScrPluginExtension_Decorated.
   Then make sure you also apply the java plugin :
 
-
+```groovy
     apply plugin: 'java'
-
+```
 
 Simple Example
 ==============
