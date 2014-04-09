@@ -14,5 +14,5 @@ dependencies {
     testCompile 'junit:junit:4.+'
 }
 
-group = 'be.jlrhome.gradle.scr'
-version = '0.0.3-SNAPSHOT'
+group = 'be.jlrhome.gradle'
+version = '1.0.0-SNAPSHOT'
