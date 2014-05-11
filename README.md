@@ -6,7 +6,15 @@ Generates the OSGI-INF/serviceComponent.xml based on the Apache scr annotations
 
 How To
 ======
-To use this plugin add a buildscript dependency of the gradle-scr-plugin to your build.grade script
+Before using the gradle-scr-plugin, the plugin itself must be available in your local repository so that it is accessible from other scripts.
+To do this pull out the gradle-scr-plugin source code and run gradle install.
+
+    git clone https://github.com/janvolck/gradle-scr-plugin.git
+    cd gradle-scr-plugin
+    gradle install
+
+Now that thet gradle-scr-plugin is installed in your local repository you can use the plugin by adding a buildscript dependency
+of the gradle-scr-plugin to your build.grade script
 
 e.g.:
 
@@ -31,6 +39,12 @@ Troubleshooting
 ```groovy
     apply plugin: 'java'
 ```
+
+* Could not resolve all dependencies for configuration ':classpath'. Could not find any version that matches be.jlrhome.gradle.scr:scrPlugin:0.0.+.
+
+The gradle scrPlugin is not available on a public repository. Before using the scrPlugin ensure that the scrPlugin is installed in you local repository.
+
+
 
 Simple Example
 ==============
