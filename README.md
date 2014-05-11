@@ -7,7 +7,7 @@ Generates the OSGI-INF/serviceComponent.xml based on the Apache scr annotations
 How To
 ======
 Before using the gradle-scr-plugin, the plugin itself must be available in your local repository so that it is accessible from other scripts.
-To do this pull out the gradle-scr-plugin source code and run gradle install.
+To do this clone the gradle-scr-plugin repository and run gradle install.
 
     git clone https://github.com/janvolck/gradle-scr-plugin.git
     cd gradle-scr-plugin
