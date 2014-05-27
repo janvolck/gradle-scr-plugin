@@ -11,7 +11,7 @@ e.g.:
 
     buildscript {
           dependencies {
-              classpath 'be.jlrhome.gradle.scr:scrPlugin:0.1.+'
+              classpath 'be.jlr-home.gradle:scrPlugin:0.1.+'
           }
       }
 
@@ -47,7 +47,7 @@ Simple Example
 
     buildscript {
         dependencies {
-            classpath 'be.jlrhome.gradle.scr:scrPlugin:0.1.+'
+            classpath 'be.jlr-home.gradle:scrPlugin:0.1.+'
         }
     }
 
@@ -61,7 +61,7 @@ Simple Example
     targetCompatibility = 1.6
 
     version = '0.0.1-SNAPSHOT'
-    group = 'be.jlrhome.gradle.scr'
+    group = 'be.jlr-home.gradle'
     description = 'Gradle scr example'
 
     dependencies {
