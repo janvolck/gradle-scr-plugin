@@ -38,10 +38,8 @@ signing {
     sign configurations.archives
 }
 
-compileJava {
-  sourceCompatibility = 1.6
-  targetCompatibility = 1.6
-}
+sourceCompatibility = 1.6
+targetCompatibility = 1.6
 
 uploadArchives {
     repositories {
