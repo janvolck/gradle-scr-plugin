@@ -118,7 +118,7 @@ class GenerateDescriptorTask extends DefaultTask {
 
             project.logger.debug(" --> Updating Service-Component value with {}", sb.toString())
             project.jar.manifest.instruction("Service-Component", sb.toString())
-            project.jar.from(project.fileTree(dir: scrOptions.getOutputDirectory(), includes:["OSGI-INF/*"]))
+            project.jar.from(project.fileTree(dir: scrOptions.getOutputDirectory()))
         }
     }
 
