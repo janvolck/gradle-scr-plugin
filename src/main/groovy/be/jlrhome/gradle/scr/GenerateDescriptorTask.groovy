@@ -18,7 +18,7 @@ class GenerateDescriptorTask extends DefaultTask {
         def dependenciesAsFile = new ArrayList<File>()
         def sources = new ArrayList<Source>()
 
-        project.configurations.compile.resolvedConfiguration.getResolvedArtifacts().each { artifact ->
+        project.configurations.compileClasspath.resolvedConfiguration.getResolvedArtifacts().each { artifact ->
             def f = artifact.getFile()
             dependenciesAsFile.add(f)
             dependenciesAsUrl.add(f.toURI().toURL())
