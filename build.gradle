@@ -1,12 +1,12 @@
 apply plugin: 'groovy'
 apply plugin: 'maven'
-apply plugin: 'signing'
 
 group = 'be.jlr-home.gradle'
 version = '0.1.3'
 
 repositories {
     mavenCentral()
+	jcenter()
 }
 
 dependencies {
@@ -34,25 +34,21 @@ artifacts {
     archives javadocJar, sourcesJar
 }
 
-signing {
-    sign configurations.archives
-}
-
 sourceCompatibility = 1.6
 targetCompatibility = 1.6
 
 uploadArchives {
     repositories {
         mavenDeployer {
-            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+           // beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
 
-            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-                authentication(userName: ossrhUsername, password: ossrhPassword)
-            }
+           // repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+           //     authentication(userName: ossrhUsername, password: ossrhPassword)
+           // }
 
-            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-                authentication(userName: ossrhUsername, password: ossrhPassword)
-            }
+            //snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+            //    authentication(userName: ossrhUsername, password: ossrhPassword)
+            //}
 
             pom.project {
                 name 'Gradle SCR Plugin'
@@ -80,6 +76,11 @@ uploadArchives {
                         name 'Jan Volckaert'
                         email 'janvolck@jlr-home.be'
                     }
+					developer {
+						id 'protenhan'
+						name 'Phillipp von Rotenhan'
+						email 'phillipp.von.rotenhan@gmail.com'
+					}
                 }
             }
         }
